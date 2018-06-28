@@ -1,0 +1,5 @@
+#for uploading and importing local drive files
+#to work in colabaratary environment
+
+from google.colab import files
+uploaded = files.upload()
