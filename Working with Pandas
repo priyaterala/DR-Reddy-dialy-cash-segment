@@ -24,7 +24,7 @@ df
 
 #O/p: 
 
-Date	Monthly Close	Weekly Close	Daily Close
+Date	Monthly_Close	Weekly_Close	Daily_Close
 0	43101	2237.250000	2447.649902	2404.149902
 1	43102	2237.250000	2447.649902	2409.199951
 2	43103	2237.250000	2447.649902	2339.000000
@@ -89,13 +89,13 @@ Date	Monthly Close	Weekly Close	Daily Close
 114 rows × 4 columns
 
 
-
-#summary of the dataframe by using pandas describe()
+#####################
+#We get summary of the dataframe by using pandas describe()
 
 df.describe()
 
 #O/p:
-        Date	   Monthly Close	Weekly Close	Daily Close
+       Date	Monthly_Close	Weekly_Close	Daily_Close
 count	114.000000	114.000000	114.000000	114.000000
 mean	43184.131579	2151.586414	2169.005709	2167.412715
 std	49.342135	132.997153	158.943626	156.310001
@@ -104,7 +104,7 @@ min	43101.000000	1936.599976	1941.400024	1893.050049
 50%	43183.500000	2109.850098	2123.550049	2127.399902
 75%	43227.750000	2269.399902	2231.500000	2211.225037
 max	43266.000000	2349.850098	2507.750000	2559.399902
-
+###############
 
 #Displays top 5 records of dataframe
 
@@ -112,28 +112,77 @@ df.head()
 
 #O/p:
 
-  Date	Monthly Close	Weekly Close	Daily Close
+  Date	Monthly_Close	Weekly_Close	Daily_Close
 0	43101	2237.25	2447.649902	2404.149902
 1	43102	2237.25	2447.649902	2409.199951
 2	43103	2237.25	2447.649902	2339.000000
 3	43104	2237.25	2447.649902	2410.800049
 4	43105	2237.25	2447.649902	2473.399902
+#############
 
 #the first series(coloumn) of the dataframe is 'date', the date format is converted 
 #to float values by using 'format cells' option in EXCEl 
 
-df['Date']
+df['Date'].head(10)
 
-df['Monthly Close'].hist(bins=5)
+#o/p:
+0    43101
+1    43102
+2    43103
+3    43104
+4    43105
+5    43108
+6    43109
+7    43110
+8    43111
+9    43112
+Name: Date, dtype: int64
+########
 
-df['Weekly Close'].hist(bins=10)
+df['Monthly_Close'].hist(bins=5)
 
-df['Daily Close'].hist(bins=20)
+#o/p:  Displays a histogram of 'Monthly_Close'
+#########
+
+df['Weekly_Close'].hist(bins=10)
+
+#o/p:  Displays a histogram of 'Weekly_Close'
+#########
+
+df['Daily_Close'].hist(bins=20)
+
+#o/p:  Displays a histogram of 'Daily_Close'
+#########
 
 #let us check the number of nulls / NaNs in the dataset
 df.apply(lambda x: sum(x.isnull()),axis=0)
 
-df['Daily Close_log'] = np.log(df['Daily Close'])
+#o/p:
+Date             0
+Monthly_Close    0
+Weekly_Close     0
+Daily_Close      0
+dtype: int64
+############
 
-df['Daily Close_log'].hist(bins=10)
+#for converting 'Daily_close' values into logarithmic values 
+#since few are at extremes, we make this so that the model learns better
+#we use numpy log function
+#and we display few updated records from dataframe
 
+df['Daily_Close_log'] = np.log(df['Daily_Close'])
+df.head()
+
+#o/p:
+Date	Monthly_Close	Weekly_Close	Daily_Close	Daily_Close_log
+0	43101	2237.25	2447.649902	2404.149902	7.784952
+1	43102	2237.25	2447.649902	2409.199951	7.787050
+2	43103	2237.25	2447.649902	2339.000000	7.757479
+3	43104	2237.25	2447.649902	2410.800049	7.787714
+4	43105	2237.25	2447.649902	2473.399902	7.813349
+###########
+
+df['Daily_Close_log'].hist(bins=10)
+
+#o/p:  Displays a histogram of 'Daily_Close_log'
+#########
