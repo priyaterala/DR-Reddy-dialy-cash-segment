@@ -21,6 +21,7 @@ of GOOGLE MACHINE LEARNING CRASH COURSE.
 And iam working in google colab environment.
 
 In this repo I created files:
-1.How to work with Python Pandas using above dataframe,
-2.
+1.Uploading csv file in to colab environment
+2.How to work with Python Pandas using above dataframe,
+
 
