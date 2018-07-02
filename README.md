@@ -18,7 +18,7 @@ on my own DataFrame .
 Since iam beginning my TENSOR-FLOW coding journey, iam developing few ML models with the help 
 of GOOGLE MACHINE LEARNING CRASH COURSE.
 
-And iam working with google colab environment.
+And iam working in google colab environment.
 
 In this repo I created files:
 1.How to work with Python Pandas using above dataframe,
