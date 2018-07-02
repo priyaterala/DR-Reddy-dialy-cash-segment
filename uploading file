@@ -9,3 +9,12 @@ O/p:
 #### after selecting, we get the following message ##### 
 ####***       drdataset 2018.csv(application/vnd.ms-excel) - 4618 bytes, last modified: 6/20/2018 - 100% done
 ####***         Saving drdataset 2018.csv to drdataset 2018.csv
+
+import pandas as pd
+import io
+
+data_frame = pd.read_csv(io.StringIO(uploaded['reddy_training.csv'].decode('utf-8')))
+data_frame
+
+O/p:
+#######It will display the data frame content
