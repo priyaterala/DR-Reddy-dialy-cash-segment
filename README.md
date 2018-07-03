@@ -24,4 +24,4 @@ In this repo I created files:
 1.Uploading csv file in to colab environment,
 2.How to work with Python Pandas using above dataframe,
 3.Implementing Linear Regressor Model using different Training and Test Data Frames.
-4.Implementing Logistic Regression (Classification) for a defined threshold value and calculating Accuracy and AUC for the validation dataset
+4.Implementing Logistic Regression Model(Classification) for a defined threshold value and calculating Accuracy and AUC on the validation dataset
