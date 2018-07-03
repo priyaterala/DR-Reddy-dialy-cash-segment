@@ -137,13 +137,13 @@ def construct_feature_columns(input_features):
       consists of a forward and backward pass using a single batch.
     feature_columns: A `set` specifying the input feature columns to use.
     training_examples: A `DataFrame` containing one or more columns from
-      `california_housing_dataframe` to use as input features for training.
+      `drdataset 2018` to use as input features for training.
     training_targets: A `DataFrame` containing exactly one column from
-      `california_housing_dataframe` to use as target for training.
+      `drdataset 2018` to use as target for training.
     validation_examples: A `DataFrame` containing one or more columns from
-      `california_housing_dataframe` to use as input features for validation.
+      `drdataset 2018` to use as input features for validation.
     validation_targets: A `DataFrame` containing exactly one column from
-      `california_housing_dataframe` to use as target for validation.
+      `drdataset 2018` to use as target for validation.
       
   Returns:
     A `LinearRegressor` object trained on the training data.
