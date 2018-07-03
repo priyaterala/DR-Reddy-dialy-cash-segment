@@ -1,9 +1,11 @@
+#uploading csv file to colab environment 
 from google.colab import files
 uploaded = files.upload()
 
-O/p:####we need to choose the file
+O/p:
+####we need to choose the file
 drdataset 2018.csv(application/vnd.ms-excel) - 4618 bytes, last modified: 6/30/2018 - 100% done
- Saving drdataset 2018.csv to drdataset 2018 (1).csv
+Saving drdataset 2018.csv to drdataset 2018 (1).csv
 ###########################################
  
 # importing files
@@ -32,6 +34,8 @@ dr_df = dr_df.reindex(np.random.permutation(dr_df.index))
 dr_df.describe()
 
 O/p:
+### the snapshort of the 'drdataset 2018'
+
 Date	Monthly_Close	Weekly_Close	Daily_Close
 count	114.0	114.0	114.0	114.0
 mean	43184.1	2151.6	2169.0	2167.4
@@ -299,7 +303,10 @@ LogLoss (on training data):
   period 08 : 0.41
   period 09 : 0.40
 Model training finished.
-###################################################
+## ****also displays a graph of LogLoss Vs. Periods ****###
+############################################################
+
+###LinearClassifier.evaluate calculates useful metrics like accuracy and AUC.###
 
 predict_validation_input_fn = lambda: my_input_fn(validation_examples, 
                                                     validation_targets["Daily_Close_is_high"], 
@@ -314,6 +321,8 @@ O/p:
 AUC on the validation set: 0.94
 Accuracy on the validation set: 0.75
 ########################################
+###***  plot a ROC Curve for the Validation Set ***###
+
 validation_probabilities = linear_classifier.predict(input_fn=predict_validation_input_fn)
 # Get just the probabilities for the positive class.
 validation_probabilities = np.array([item['probabilities'][1] for item in validation_probabilities])
@@ -324,5 +333,6 @@ plt.plot(false_positive_rate, true_positive_rate, label="our model")
 plt.plot([0, 1], [0, 1], label="random classifier")
 _ = plt.legend(loc=2)
 O/p:
+###*** we get a graph plotting ROC for our model and random classifier ***###
 
 ################################################################
