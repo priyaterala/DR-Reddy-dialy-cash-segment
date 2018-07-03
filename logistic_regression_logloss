@@ -1,0 +1,328 @@
+from google.colab import files
+uploaded = files.upload()
+
+O/p:####we need to choose the file
+drdataset 2018.csv(application/vnd.ms-excel) - 4618 bytes, last modified: 6/30/2018 - 100% done
+ Saving drdataset 2018.csv to drdataset 2018 (1).csv
+###########################################
+ 
+# importing files
+from __future__ import print_function
+
+import math
+
+from IPython import display
+from matplotlib import cm
+from matplotlib import gridspec
+from matplotlib import pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn import metrics
+import tensorflow as tf
+from tensorflow.python.data import Dataset
+import io
+
+tf.logging.set_verbosity(tf.logging.ERROR)
+#display format
+pd.options.display.max_rows = 10
+pd.options.display.float_format = '{:.1f}'.format
+
+dr_df = pd.read_csv(io.StringIO(uploaded['drdataset 2018.csv'].decode('utf-8')))
+dr_df = dr_df.reindex(np.random.permutation(dr_df.index))
+dr_df.describe()
+
+O/p:
+Date	Monthly_Close	Weekly_Close	Daily_Close
+count	114.0	114.0	114.0	114.0
+mean	43184.1	2151.6	2169.0	2167.4
+std	49.3	133.0	158.9	156.3
+min	43101.0	1936.6	1941.4	1893.1
+25%	43140.8	2080.6	2074.4	2081.2
+50%	43183.5	2109.9	2123.6	2127.4
+75%	43227.8	2269.4	2231.5	2211.2
+max	43266.0	2349.9	2507.8	2559.4
+#########################################################
+
+def preprocess_features(dr_df):
+  """Prepares input features from drdataset 2018
+
+  Args:
+    dr_df: A Pandas DataFrame expected to contain data from drdataset 2018.
+  Returns:
+    A DataFrame that contains the features to be used for the model.
+  """
+  selected_features = dr_df[
+    ["Date",
+     "Monthly_Close",
+     "Weekly_Close",
+     ]]
+  processed_features = selected_features.copy()
+  return processed_features
+
+def preprocess_targets(dr_df):
+  """Prepares target features (i.e., labels) from drdataset 2018.
+
+  Args:
+    dr_df: A Pandas DataFrame expected to contain data from the drdataset 2018.
+  Returns:
+    A DataFrame that contains the target feature.
+  """
+  output_targets = pd.DataFrame()
+
+# Create a boolean categorical feature at threshold value 75% - ile on Daily_Close
+ #If Daily_Close is above a set threshold its value is exactly 1 or its value is exactly 0 ..
+  
+  output_targets["Daily_Close_is_high"] = (dr_df["Daily_Close"]>2211.2).astype(float)
+  return output_targets
+  
+#######################################
+
+# Choose the first 90 (out of 114) examples for training.
+training_examples = preprocess_features(dr_df.head(90))
+training_targets = preprocess_targets(dr_df.head(90))
+
+# Choose the last 24 (out of 114) examples for validation.
+validation_examples = preprocess_features(dr_df.tail(24))
+validation_targets = preprocess_targets(dr_df.tail(24))
+
+# Double-check that we've done the right thing.
+print("Training examples summary:")
+display.display(training_examples.describe())
+print("Validation examples summary:")
+display.display(validation_examples.describe())
+
+print("Training targets summary:")
+display.display(training_targets.describe())
+print("Validation targets summary:")
+display.display(validation_targets.describe())
+
+O/p:
+Training examples summary:
+Date	Monthly_Close	Weekly_Close
+count	90.0	90.0	90.0
+mean	43185.7	2146.3	2170.0
+std	49.7	138.3	155.4
+min	43101.0	1936.6	1941.4
+25%	43143.5	2080.6	2082.9
+50%	43192.5	2109.9	2124.2
+75%	43229.8	2269.4	2231.5
+max	43265.0	2349.9	2507.8
+
+Validation examples summary:
+Date	Monthly_Close	Weekly_Close
+count	24.0	24.0	24.0
+mean	43178.2	2171.4	2165.3
+std	48.4	111.4	175.2
+min	43103.0	1936.6	1941.4
+25%	43134.5	2109.9	2072.3
+50%	43177.0	2173.6	2110.7
+75%	43220.5	2245.3	2247.6
+max	43266.0	2349.9	2507.8
+
+Training targets summary:
+Daily_Close_is_high
+count	90.0
+mean	0.2
+std	0.4
+min	0.0
+25%	0.0
+50%	0.0
+75%	0.0
+max	1.0
+
+Validation targets summary:
+Daily_Close_is_high
+count	24.0
+mean	0.3
+std	0.5
+min	0.0
+25%	0.0
+50%	0.0
+75%	1.0
+max	1.0
+############################################
+
+def construct_feature_columns(input_features):
+  """Construct the TensorFlow Feature Columns.
+
+  Args:
+    input_features: The names of the numerical input features to use.
+  Returns:
+    A set of feature columns
+  """
+  return set([tf.feature_column.numeric_column(my_feature)
+              for my_feature in input_features])
+  ###################################################
+  
+  def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
+    """Trains a logistic regression model.
+  
+    Args:
+      features: pandas DataFrame of features
+      targets: pandas DataFrame of targets
+      batch_size: Size of batches to be passed to the model
+      shuffle: True or False. Whether to shuffle the data.
+      num_epochs: Number of epochs for which data should be repeated. None = repeat indefinitely
+    Returns:
+      Tuple of (features, labels) for next data batch
+    """
+    
+    # Convert pandas data into a dict of np arrays.
+    features = {key:np.array(value) for key,value in dict(features).items()}                                            
+ 
+    # Construct a dataset, and configure batching/repeating.
+    ds = Dataset.from_tensor_slices((features,targets)) # warning: 2GB limit
+    ds = ds.batch(batch_size).repeat(num_epochs)
+    
+    # Shuffle the data, if specified.
+    if shuffle:
+      ds = ds.shuffle(10000)
+    
+    # Return the next batch of data.
+    features, labels = ds.make_one_shot_iterator().get_next()
+    return features, labels
+ ################################################################
+ def train_linear_classifier_model(
+    learning_rate,
+    steps,
+    batch_size,
+    training_examples,
+    training_targets,
+    validation_examples,
+    validation_targets):
+  """Trains a linear classification model.
+  
+  In addition to training, this function also prints training progress information,
+  as well as a plot of the training and validation loss over time.
+  
+  Args:
+    learning_rate: A `float`, the learning rate.
+    steps: A non-zero `int`, the total number of training steps. A training step
+      consists of a forward and backward pass using a single batch.
+    batch_size: A non-zero `int`, the batch size.
+    training_examples: A `DataFrame` containing one or more columns from
+      `drdataset 2018` to use as input features for training.
+    training_targets: A `DataFrame` containing exactly one column from
+      `drdataset 2018` to use as target for training.
+    validation_examples: A `DataFrame` containing one or more columns from
+      `drdataset 2018` to use as input features for validation.
+    validation_targets: A `DataFrame` containing exactly one column from
+      `drdataset 2018
+      ` to use as target for validation.
+      
+  Returns:
+    A `LinearClassifier` object trained on the training data.
+  """
+
+  periods = 10
+  steps_per_period = steps / periods
+  
+  # Create a linear classifier object.
+  my_optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+  my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)  
+  linear_classifier = tf.estimator.LinearClassifier(
+      feature_columns=construct_feature_columns(training_examples),
+      optimizer=my_optimizer
+  )
+  
+  # Create input functions.
+  training_input_fn = lambda: my_input_fn(training_examples, 
+                                          training_targets["Daily_Close_is_high"], 
+                                          batch_size=batch_size)
+  predict_training_input_fn = lambda: my_input_fn(training_examples, 
+                                                  training_targets["Daily_Close_is_high"], 
+                                                  num_epochs=1, 
+                                                  shuffle=False)
+  predict_validation_input_fn = lambda: my_input_fn(validation_examples, 
+                                                    validation_targets["Daily_Close_is_high"], 
+                                                    num_epochs=1, 
+                                                    shuffle=False)
+  
+  # Train the model, but do so inside a loop so that we can periodically assess
+  # loss metrics.
+  print("Training model...")
+  print("LogLoss (on training data):")
+  training_log_losses = []
+  validation_log_losses = []
+  for period in range (0, periods):
+    # Train the model, starting from the prior state.
+    linear_classifier.train(
+        input_fn=training_input_fn,
+        steps=steps_per_period
+    )
+    # Take a break and compute predictions.    
+    training_probabilities = linear_classifier.predict(input_fn=predict_training_input_fn)
+    training_probabilities = np.array([item['probabilities'] for item in training_probabilities])
+    
+    validation_probabilities = linear_classifier.predict(input_fn=predict_validation_input_fn)
+    validation_probabilities = np.array([item['probabilities'] for item in validation_probabilities])
+    
+    training_log_loss = metrics.log_loss(training_targets, training_probabilities)
+    validation_log_loss = metrics.log_loss(validation_targets, validation_probabilities)
+    # Occasionally print the current loss.
+    print("  period %02d : %0.2f" % (period, training_log_loss))
+    # Add the loss metrics from this period to our list.
+    training_log_losses.append(training_log_loss)
+    validation_log_losses.append(validation_log_loss)
+  print("Model training finished.")
+  
+  # Output a graph of loss metrics over periods.
+  plt.ylabel("LogLoss")
+  plt.xlabel("Periods")
+  plt.title("LogLoss vs. Periods")
+  plt.tight_layout()
+  plt.plot(training_log_losses, label="training")
+  plt.plot(validation_log_losses, label="validation")
+  plt.legend()
+
+  return linear_classifier
+################################################################
+linear_classifier = train_linear_classifier_model(
+    learning_rate=0.000001,
+    steps=20000,
+    batch_size=500,
+    training_examples=training_examples,
+    training_targets=training_targets,
+    validation_examples=validation_examples,
+    validation_targets=validation_targets)
+O/p:
+Training model...
+LogLoss (on training data):
+  period 00 : 0.52
+  period 01 : 0.50
+  period 02 : 0.48
+  period 03 : 0.47
+  period 04 : 0.45
+  period 05 : 0.44
+  period 06 : 0.43
+  period 07 : 0.42
+  period 08 : 0.41
+  period 09 : 0.40
+Model training finished.
+###################################################
+
+predict_validation_input_fn = lambda: my_input_fn(validation_examples, 
+                                                    validation_targets["Daily_Close_is_high"], 
+                                                    num_epochs=1, 
+                                                    shuffle=False)
+evaluation_metrics = linear_classifier.evaluate(input_fn=predict_validation_input_fn)
+
+print("AUC on the validation set: %0.2f" % evaluation_metrics['auc'])
+print("Accuracy on the validation set: %0.2f" % evaluation_metrics['accuracy'])
+
+O/p:
+AUC on the validation set: 0.94
+Accuracy on the validation set: 0.75
+########################################
+validation_probabilities = linear_classifier.predict(input_fn=predict_validation_input_fn)
+# Get just the probabilities for the positive class.
+validation_probabilities = np.array([item['probabilities'][1] for item in validation_probabilities])
+
+false_positive_rate, true_positive_rate, thresholds = metrics.roc_curve(
+    validation_targets, validation_probabilities)
+plt.plot(false_positive_rate, true_positive_rate, label="our model")
+plt.plot([0, 1], [0, 1], label="random classifier")
+_ = plt.legend(loc=2)
+O/p:
+
+################################################################
