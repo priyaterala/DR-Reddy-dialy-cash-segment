@@ -25,3 +25,5 @@ In this repo I created files:
 2.How to work with Python Pandas using above dataframe,
 3.Implementing Linear Regressor Model using different Training and Test Data Frames.
 4.Implementing Logistic Regression Model(Classification) for a defined threshold value and calculating Accuracy and AUC on the validation dataset
+5.Implementing Neural Networks and its hidden layers using the TensorFlow DNNRegressor class and to
+train to learn nonlinearities in a dataset and achieve better performance than a linear regression model.
